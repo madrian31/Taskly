@@ -85,6 +85,7 @@
 
 ### AFTER: Modern Redesigned Component
 
+{% raw %}
 ```jsx
 <TaskCard
   task={{
@@ -109,6 +110,8 @@
   // ... other handlers
 />
 ```
+
+{% endraw %}
 
 **Structure:**
 ```
