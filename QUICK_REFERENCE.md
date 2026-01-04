@@ -44,6 +44,7 @@ function App() {
 
 ### TaskCard.jsx
 
+{% raw %}
 ```javascript
 <TaskCard
   task={{
@@ -65,16 +66,18 @@ function App() {
   // ... other handlers
 />
 ```
+{% endraw %}
 
 ### TaskCardAdvanced.jsx
 
-Same as above, plus:
+{% raw %}
 ```javascript
 isDarkMode={true}
 onSetPriority={(ownerUid, taskId, priority) => {}}
 onAddTag={(ownerUid, taskId, tag) => {}}
 onRemoveTag={(ownerUid, taskId, tag) => {}}
 ```
+{% endraw %}
 
 ## Key Design Changes
 
