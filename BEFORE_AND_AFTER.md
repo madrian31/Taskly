@@ -88,27 +88,31 @@
 {% raw %}
 ```jsx
 <TaskCard
-  task={{
-    _owner: 'user123',
-    _taskId: 'task1',
-    _ownerDisplay: 'John Doe',
-    title: 'Task Title',
-    description: 'Description',
-    completed: false,
-    targetDate: '2026-01-15',
-    collaborators: {
-      'user456': { name: 'Jane Smith', ... }
-    },
-    subtasks: {
-      'sub1': { title: 'Subtask 1', completed: false }
-    }
-  }}
+  task={taskObj}
   isOwner={true}
   onToggleComplete={handleToggleComplete}
   onDeleteTask={handleDeleteTask}
   onAddSubtask={handleAddSubtask}
   // ... other handlers
 />
+```
+
+```javascript
+const taskObj = {
+  _owner: 'user123',
+  _taskId: 'task1',
+  _ownerDisplay: 'John Doe',
+  title: 'Task Title',
+  description: 'Description',
+  completed: false,
+  targetDate: '2026-01-15',
+  collaborators: {
+    'user456': { name: 'Jane Smith' /* ... */ }
+  },
+  subtasks: {
+    'sub1': { title: 'Subtask 1', completed: false }
+  }
+};
 ```
 
 {% endraw %}
