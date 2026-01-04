@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/sidebar.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/modal.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/events.css">
+</head>
+<body>
+  <button class="toggle-btn" id="toggleBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="fas fa-cube"></i>
+        <span>SmartAdmin</span>
+      </div>
+    </div>
+
+    <div class="user-profile">
+      <div class="user-avatar">
+        <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile">
+      </div>
+      <div class="user-info">
+        <h4 id="userName">Loading...</h4>
+        <p id="userEmail">Please wait...</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu" id="sidebarMenu">
+      <!-- Menu items will be generated here by JavaScript -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-calendar-alt"></i> Event Management</h2>
+        <div class="header-actions">
+          <button class="refresh-btn" onclick="loadEvents()">
+            <i class="fas fa-sync-alt"></i>
+            Refresh
+          </button>
+          <button class="add-btn" onclick="openCreateEventModal()">
+            <i class="fas fa-plus"></i>
+            Create Event
+          </button>
+        </div>
+      </div>
+
+      <div id="tableContent">
+        <div class="loading">
+          <i class="fas fa-spinner fa-spin fa-2x"></i>
+          <p>Loading events...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal HTML Template -->
+  <div id="modalContainer" class="modal-overlay">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 id="modalTitle">Modal Title</h3>
+        <button class="modal-close" id="modalClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button id="modalCancelBtn" class="modal-btn cancel">Cancel</button>
+        <button id="modalConfirmBtn" class="modal-btn confirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Templates for events (cloned by JS) -->
+    <template id="tpl-loading-events">
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p>Loading events...</p>
+      </div>
+    </template>
+
+    <template id="tpl-empty-events">
+      <div class="empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <p>No events yet. Create your first event!</p>
+      </div>
+    </template>
+
+    <template id="tpl-event-card">
+      <div class="event-card">
+        <div class="event-details-section">
+          <div class="event-detail-group created-by-group">
+            <div class="event-detail-label">CREATED BY</div>
+            <div class="event-detail-value">
+              <div class="created-meta">
+                <img class="avatar creator-avatar" src="" alt="creator">
+                <div class="small-meta">
+                  <div class="created-relative"></div>
+                  <div class="meta-name creator-name"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">EVENT</div>
+            <div class="event-detail-value event-title-value"></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">DATE</div>
+            <div class="event-detail-value event-date-value"></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">TIME</div>
+            <div class="event-detail-value event-time-value"></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">TYPE</div>
+            <div class="event-detail-value"><span class="event-type-badge type-badge"></span></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">LOCATION</div>
+            <div class="event-detail-value event-location-value"></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">STATUS</div>
+            <div class="event-detail-value"><span class="event-status-badge status-badge"></span></div>
+          </div>
+
+          <div class="event-detail-group">
+            <div class="event-detail-label">RECURRENCE</div>
+            <div class="event-detail-value event-recurrence-value"></div>
+          </div>
+        </div>
+
+        <div class="event-actions-section">
+          <button class="event-btn view"><i class="fas fa-eye"></i> View</button>
+          <button class="event-btn edit"><i class="fas fa-edit"></i> Edit</button>
+          <button class="event-btn delete"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+      </div>
+    </template>
+
+    <template id="tpl-event-form">
+      <form id="eventForm" class="event-form-new">
+        <!-- form fields will be populated by JS -->
+        <div class="form-section">
+          <label for="eventTitle" class="form-label"><i class="fas fa-heading"></i> Event Title <span class="required">*</span></label>
+          <input type="text" id="eventTitle" placeholder="Enter event title" required class="form-input">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <label for="eventDate" class="form-label"><i class="fas fa-calendar"></i> Start Date <span class="required">*</span></label>
+            <input type="date" id="eventDate" required class="form-input">
+          </div>
+          <div class="form-section">
+            <label for="eventEndDate" class="form-label">End Date</label>
+            <input type="date" id="eventEndDate" class="form-input">
+          </div>
+        </div>
+        <div class="form-section checkbox-section">
+          <label class="checkbox-label"><input type="checkbox" id="eventAllDay" class="form-checkbox"> <span>All-day Event</span></label>
+        </div>
+        <div class="form-row time-fields" id="timeFields">
+          <div class="form-section">
+            <label for="eventStartTime" class="form-label"><i class="fas fa-clock"></i> Start Time <span class="required">*</span></label>
+            <input type="time" id="eventStartTime" class="form-input">
+          </div>
+          <div class="form-section">
+            <label for="eventEndTime" class="form-label"><i class="fas fa-clock"></i> End Time</label>
+            <input type="time" id="eventEndTime" class="form-input">
+          </div>
+        </div>
+        <div class="form-section">
+          <label for="eventDescription" class="form-label"><i class="fas fa-file-alt"></i> Description</label>
+          <textarea id="eventDescription" class="form-textarea"></textarea>
+        </div>
+        <div class="form-section">
+          <label for="eventLocation" class="form-label"><i class="fas fa-map-marker-alt"></i> Location</label>
+          <input type="text" id="eventLocation" class="form-input">
+        </div>
+        <div class="form-row">
+          <div class="form-section">
+            <label for="eventType" class="form-label"><i class="fas fa-tag"></i> Event Type</label>
+            <select id="eventType" class="form-input"></select>
+          </div>
+          <div class="form-section">
+            <label for="eventStatus" class="form-label">Status</label>
+            <select id="eventStatus" class="form-input"></select>
+          </div>
+        </div>
+        <div class="form-section">
+          <label for="eventRecurrence" class="form-label">Recurrence</label>
+          <select id="eventRecurrence" class="form-input"></select>
+        </div>
+        <div class="form-section">
+          <label for="eventNotes" class="form-label">Additional Notes</label>
+          <textarea id="eventNotes" class="form-textarea"></textarea>
+        </div>
+      </form>
+    </template>
+
+    <template id="tpl-event-details">
+      <div class="event-details">
+        <!-- populated by JS -->
+      </div>
+    </template>
+
+    <template id="tpl-success-inline">
+      <div style="text-align: center; padding: 20px 0;">
+        <i class="fas fa-check-circle" style="font-size: 48px; color: #28a745; margin-bottom: 15px;"></i>
+        <p class="success-message" style="font-size: 16px; color: #333;"></p>
+      </div>
+    </template>
+
+  <!-- Scripts -->
+  <script type="module" src="../../Services/MenuServices.js"></script>
+  <script type="module" src="../../wwwroot/scripts/sidebar.js"></script>
+  <script type="module" src="../../wwwroot/scripts/modal.js"></script>
+  <script type="module" src="../../wwwroot/scripts/auth.js"></script>
+  <script type="module" src="../../Services/EventService.js"></script>
+  <script type="module" src="../../wwwroot/scripts/events.js"></script>
+</body>
+</html>

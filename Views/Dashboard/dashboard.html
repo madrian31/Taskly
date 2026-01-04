@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard with Sidebar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/sidebar.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/modal.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/dashboard.css">
+  <!-- Flatpickr Calendar -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body class="dashboard-layout">
+  <button class="toggle-btn" id="toggleBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="fas fa-cube"></i>
+        <span>SmartAdmin</span>
+      </div>
+    </div>
+
+   <div class="user-profile">
+      <div class="user-avatar">
+        <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile">
+      </div>
+      <div class="user-info">
+        <h4 id="userName">Loading...</h4>
+        <p id="userEmail">Please wait...</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu" id="sidebarMenu">
+      <!-- Menu items will be generated here by JavaScript -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <main class="main-content" id="mainContent">
+    <h1>Main Content Area</h1>
+    <p>Your dashboard content goes here...</p>
+  </main>
+
+  <!-- Right Sidebar / Aside Panel -->
+  <aside class="aside-panel" id="asidePanel">
+    <div class="aside-header">
+      <h3>Quick Info</h3>
+    </div>
+
+    <div class="aside-content">
+      <!-- Notifications Section -->
+      <div class="aside-widget">
+        <h4><i class="fas fa-bell"></i> Notifications</h4>
+        <div class="widget-body">
+          <p class="placeholder-text">No new notifications</p>
+        </div>
+      </div>
+
+      <!-- Calendar Section -->
+      <div class="aside-widget">
+       
+        <div class="calendar-view">
+            <h4><i class="fas fa-calendar-alt"></i> Calendar</h4>
+            <div class="widget-body" id="calendarContainer">
+              <!-- Calendar will be rendered here -->
+            </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats Section -->
+      <div class="aside-widget">
+        <h4><i class="fas fa-chart-pie"></i> Quick Stats</h4>
+        <div class="widget-body">
+          <div class="stat-item">
+            <span class="stat-label">Total Users</span>
+            <span class="stat-value" id="totalUsers">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Active Today</span>
+            <span class="stat-value" id="activeUsers">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity Section -->
+      <div class="aside-widget">
+        <h4><i class="fas fa-history"></i> Recent Activity</h4>
+        <div class="widget-body">
+          <p class="placeholder-text">No recent activity</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Modal HTML Template -->
+  <div id="modalContainer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Events</h3>
+        <button class="modal-close" id="modalClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button class="btn-primary" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script type="module" src="../../Services/MenuServices.js"></script>
+<script type="module" src="../../wwwroot/scripts/sidebar.js"></script>
+<script type="module" src="../../wwwroot/scripts/modal.js"></script>
+<script type="module" src="../../wwwroot/scripts/auth.js"></script>
+<script type="module" src="../../wwwroot/scripts/HolidayService.js"></script>
+
+<script type="module" src="../../wwwroot/scripts/calendarInit.js"></script>
+  
+</body>
+</html>

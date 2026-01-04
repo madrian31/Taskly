@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/sidebar.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/modal.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/users.css">
+</head>
+<body>
+  <button class="toggle-btn" id="toggleBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="fas fa-cube"></i>
+        <span>SmartAdmin</span>
+      </div>
+    </div>
+
+   <div class="user-profile">
+      <div class="user-avatar">
+        <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile">
+      </div>
+      <div class="user-info">
+        <h4 id="userName">Loading...</h4>
+        <p id="userEmail">Please wait...</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu" id="sidebarMenu">
+      <!-- Menu items will be generated here by JavaScript -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    <div class="table-container">
+      <div class="table-header">
+        <h2><i class="fas fa-users"></i> User Management</h2>
+        <button class="refresh-btn" onclick="loadUsers()">
+          <i class="fas fa-sync-alt"></i>
+          Refresh
+        </button>
+      </div>
+
+      <!-- Filters: status and search -->
+      <div class="filters-bar">
+        <div class="filter-item">
+          <label for="userFilterStatus">Status</label>
+          <select id="userFilterStatus">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="deactivated">Deactivated</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label for="userFilterRole">Role</label>
+          <select id="userFilterRole">
+            <option value="all">All</option>
+            <option value="administrator">Administrator</option>
+            <option value="staff">Staff</option>
+            <option value="moderator">Moderator</option>
+            <option value="member">Member</option>
+          </select>
+        </div>
+
+        <div class="filter-item">
+          <label for="userSearchInput">Search</label>
+          <input id="userSearchInput" type="search" placeholder="Search by name..." />
+        </div>
+      </div>
+
+      <div id="tableContent">
+        <div class="loading">
+          <i class="fas fa-spinner fa-spin fa-2x"></i>
+          <p>Loading users...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal HTML Template -->
+  <div id="modalContainer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Modal Title</h3>
+        <button class="modal-close" id="modalClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button class="btn-primary" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Templates for user cards and states (cloned by JS) -->
+    <template id="tpl-loading">
+      <div class="loading">
+        <i class="fas fa-spinner fa-spin fa-2x"></i>
+        <p>Loading users...</p>
+      </div>
+    </template>
+
+    <template id="tpl-no-data">
+      <div class="no-data">
+        <i class="fas fa-inbox fa-2x"></i>
+        <p>No users found</p>
+      </div>
+    </template>
+
+    <template id="tpl-error">
+      <div class="no-data">
+        <i class="fas fa-exclamation-triangle fa-2x"></i>
+        <p class="error-message">Error loading users. Please try again.</p>
+      </div>
+    </template>
+
+    <template id="user-card-template">
+      <div class="user-card">
+        <div class="user-avatar-section">
+          <img class="user-avatar-large" src="" alt="User avatar">
+        </div>
+        <div class="user-details-section">
+          <div class="user-detail-group">
+            <div class="user-detail-label">USER</div>
+            <div class="user-detail-value user-name"></div>
+          </div>
+          <div class="user-detail-group">
+            <div class="user-detail-label">EMAIL</div>
+            <div class="user-detail-value user-email"></div>
+          </div>
+          <div class="user-detail-group">
+            <div class="user-detail-label">ROLE</div>
+            <div class="user-detail-value"><span class="role-badge role-placeholder"></span></div>
+          </div>
+          <div class="user-detail-group">
+            <div class="user-detail-label">ACCOUNT STATUS</div>
+            <div class="user-detail-value"><span class="status-badge status-placeholder"></span></div>
+          </div>
+          <div class="user-detail-group">
+            <div class="user-detail-label">CREATED AT</div>
+            <div class="user-detail-value created-at"></div>
+          </div>
+          <div class="user-detail-group">
+            <div class="user-detail-label">LAST LOGIN</div>
+            <div class="user-detail-value last-login"></div>
+          </div>
+        </div>
+        <div class="user-actions-section">
+          <button class="btn-role"><i class="fas fa-user-tag"></i> Change Role</button>
+          <button class="btn-deactivate"><i class="fas fa-ban"></i> Deactivate</button>
+          <button class="btn-activate"><i class="fas fa-check-circle"></i> Activate</button>
+        </div>
+      </div>
+    </template>
+  
+    <!-- Modal templates -->
+    <template id="tpl-role-selection">
+      <div class="role-selection">
+        <p>Select a new role for <strong class="modal-user-name">User</strong>:</p>
+        <select id="roleSelect" class="role-select">
+          <option value="administrator">Administrator</option>
+          <option value="staff">Staff</option>
+          <option value="moderator">Moderator</option>
+          <option value="member">Member</option>
+        </select>
+      </div>
+    </template>
+
+    <template id="tpl-activate-confirm">
+      <div style="padding: 20px 0; text-align: left;">
+        <p style="font-size: 16px; margin-bottom: 15px;">
+          Are you sure you want to activate <strong class="modal-user-name">User</strong>'s account?
+        </p>
+        <p style="font-size: 14px; color: #666;">They will be able to log in and access the system again.</p>
+      </div>
+    </template>
+
+    <template id="tpl-deactivate-confirm">
+      <div style="padding: 20px 0; text-align: left;">
+        <p style="font-size: 16px; margin-bottom: 15px;">⚠️ Are you sure you want to deactivate <strong class="modal-user-name">User</strong>'s account?</p>
+        <p style="font-size: 14px; color: #d9534f; background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #f0ad4e;">
+          <strong>Warning:</strong> They will be logged out immediately and won't be able to log in again until reactivated.
+        </p>
+      </div>
+    </template>
+
+<script type="module" src="../../Services/MenuServices.js"></script>
+<script type="module" src="../../wwwroot/scripts/sidebar.js"></script>
+<script type="module" src="../../wwwroot/scripts/modal.js"></script>
+<script type="module" src="../../wwwroot/scripts/auth.js"></script>
+<script type="module" src="../../wwwroot/scripts/users.js"></script>
+
+</body>
+</html>

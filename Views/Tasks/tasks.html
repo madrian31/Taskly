@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard with Sidebar</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/sidebar.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/dashboard.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/modal.css">
+  <link rel="stylesheet" href="../../wwwroot/styles/tasks.css">
+</head>
+<body>
+  <button class="toggle-btn" id="toggleBtn">
+    <i class="fas fa-bars"></i>
+  </button>
+      <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-brand">
+        <i class="fas fa-cube"></i>
+        <span>SmartAdmin</span>
+      </div>
+    </div>
+
+   <div class="user-profile">
+      <div class="user-avatar">
+        <img id="userPhoto" src="https://ui-avatars.com/api/?name=User&background=3498db&color=fff" alt="Profile">
+      </div>
+      <div class="user-info">
+        <h4 id="userName">Loading...</h4>
+        <p id="userEmail">Please wait...</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-menu" id="sidebarMenu">
+      <!-- Menu items will be generated here by JavaScript -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content" id="mainContent">
+    <div class="tasks-page">
+      <div class="table-container">
+        <header class="tasks-header">
+          <div class="header-inner">
+            <h1><i class="fas fa-tasks"></i> Task Management</h1>
+            <p class="subtitle">Manage your tasks — personal and shared</p>
+          </div>
+        </header>
+
+        <div class="tasks-controls">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="mine"><i class="fas fa-user"></i> My Tasks</button>
+            <button class="tab" data-tab="shared"><i class="fas fa-users"></i> Shared with Me</button>
+          </div>
+
+          <section class="task-creator">
+            <form id="taskForm">
+              <div class="form-row">
+                <input id="taskTitle" type="text" placeholder="What needs to be done?" required />
+                <input id="taskTargetDate" type="date" title="Due date" />
+              </div>
+              <div class="form-row">
+                <input id="taskDescription" type="text" placeholder="Add a description (optional)" />
+              </div>
+              <div class="form-row recurrence-controls">
+                <label for="taskRecurrence"><i class="fas fa-redo"></i> Repeat</label>
+                <select id="taskRecurrence">
+                  <option value="none">No repeat</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+                <input id="taskRecurrenceInterval" type="number" min="1" value="1" class="small" title="Interval" />
+                <button type="submit" class="primary"><i class="fas fa-plus"></i> Add Task</button>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <section class="tasks-grid" id="tasksList" aria-live="polite">
+          <!-- Tasks will be rendered here as cards -->
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal HTML Template -->
+  <div id="modalContainer" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Confirm Action</h3>
+        <button class="modal-close" id="modalClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Dynamic content will be inserted here -->
+      </div>
+      <div class="modal-footer" id="modalFooter">
+        <button class="btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button class="btn-primary" id="modalConfirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+    
+  <!-- Reusable Templates -->
+  <template id="tpl-no-tasks">
+    <div class="no-tasks">
+      <i class="fas fa-clipboard-list fa-3x"></i>
+      <p>No tasks yet. Add your first task!</p>
+    </div>
+  </template>
+
+  <template id="tpl-subtask-add-form">
+    <div class="subtask-add-form">
+      <input type="text" placeholder="Enter subtask name..." />
+      <button class="subtask-add-btn">Add</button>
+      <button class="subtask-cancel-btn">Cancel</button>
+    </div>
+  </template>
+
+  <template id="tpl-collab-item">
+    <li class="collab-item">
+      <img class="collab-img" alt="" />
+      <span class="collab-name"></span>
+      <button class="remove-collab"><i class="fas fa-times"></i></button>
+    </li>
+  </template>
+
+  <template id="tpl-manage-collab">
+    <div class="task-manage-collab-section">
+      <div class="manage-collab-title">
+        <i class="fas fa-user-plus"></i> Manage Collaborators
+      </div>
+      <form class="add-collab-form">
+        <select name="collabSelect">
+          <option value="">Select user to add...</option>
+        </select>
+        <button type="submit"><i class="fas fa-plus"></i> Add</button>
+      </form>
+      <ul class="collaborators-list"></ul>
+    </div>
+  </template>
+
+  <template id="tpl-subtask-item">
+    <div class="subtask-item">
+      <input type="checkbox" class="subtask-checkbox" />
+      <span class="subtask-text"></span>
+      <button class="delete-subtask"><i class="fas fa-times"></i></button>
+    </div>
+  </template>
+
+  <template id="tpl-task-card">
+    <div class="task-card">
+      <div class="task-card-header">
+        <div class="task-header-row">
+          <div class="task-header-left">
+            <input type="checkbox" class="task-checkbox" />
+            <div class="task-header-content">
+              <h2 class="task-title"></h2>
+              <p class="task-description"></p>
+            </div>
+          </div>
+          <div class="task-menu-placeholder"></div>
+        </div>
+      </div>
+
+      <div class="task-card-metadata">
+        <div class="task-meta-grid">
+          <div class="task-meta-item owner-meta">
+            <i class="fas fa-user"></i>
+            <div class="task-meta-content">
+              <div class="task-meta-label">Owner</div>
+              <div class="task-meta-value">
+                <div class="owner-badge">
+                  <img class="owner-photo" />
+                  <span class="owner-name"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-meta-item">
+            <i class="fas fa-calendar-alt"></i>
+            <div class="task-meta-content">
+              <div class="task-meta-label">Due Date</div>
+              <div class="task-meta-value">
+                <button class="due-date-btn">Set due date</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-meta-item">
+            <div class="task-meta-content">
+              <div class="progress-container">
+                <div class="progress-header">
+                  <span class="progress-label">Progress</span>
+                  <span class="progress-count"></span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-collaborators-section">
+        <div class="collab-header">
+          <h3 class="collab-title">Collaborators</h3>
+          <button class="collab-add-btn">+ Add</button>
+        </div>
+        <div class="collaborators-avatars"></div>
+      </div>
+
+      <div class="task-subtasks-section">
+        <div class="subtasks-header">
+          <span class="subtasks-title">Subtasks</span>
+          <span class="subtasks-count"></span>
+        </div>
+        <div class="subtasks-list"></div>
+      </div>
+    </div>
+  </template>
+
+  <template id="tpl-delete-confirm">
+    <div class="delete-confirm-body">
+      <p class="delete-line1" style="font-size:15px; color:#495057;"></p>
+      <p class="delete-line2" style="font-size:13px; color:#888;">This action cannot be undone.</p>
+    </div>
+  </template>
+  <!-- Scripts -->
+  <script type="module" src="../../Services/MenuServices.js"></script>
+  <script type="module" src="../../wwwroot/scripts/sidebar.js"></script>
+  <script type="module" src="../../wwwroot/scripts/auth.js"></script>
+  <script type="module" src="../../wwwroot/scripts/tasks.js"></script>
+</body>
+</html>
